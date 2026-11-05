@@ -95,7 +95,11 @@ vig.save(os.path.join(OUT, "vignette.png"))
 print("vignette.png", vig.size)
 
 # The sky as it is.
-Image.open(os.path.join(SRC, "sky_keys.png")).convert("RGB").save(os.path.join(OUT, "sky.png"))
+# The colours of the keys are noisy (measured on a compressed recording): run
+# tools/smooth_sky.py on sky_keys.png first (the smoothed copy is the source).
+# The picture is saved with an alpha channel (all 255): the engine loads a PNG
+# without one as RGB565, whose steps of 8 levels are seen as stripes in a sky.
+Image.open(os.path.join(SRC, "sky_keys.png")).convert("RGBA").save(os.path.join(OUT, "sky.png"))
 print("sky.png")
 
 # The keys, as Lua.
