@@ -122,44 +122,51 @@ for i, src in enumerate((20, 40, 0, 60)):
     icon = sheet.crop((src, 26, src + 20, 46)).resize((14, 14), Image.BOX)
     sheet.paste(icon, (144 + 16 * i, 56))
 
-# The knobs of the sliders: 16x24 pixels in the 18x26 cell (the slider
-# background is 24 rows high in its 26-row cell, so the cell has transparent
-# edges at the right and the bottom). The frame is the one of the old knobs, the
-# same on all four sides, and the light bevel is only at the top and the left:
-#   selected  yellow 1 px, black 1 px, light bevel, purple fill
-#   static    black 2 px, light bevel, grey fill
+# The knobs of the sliders, drawn at the size they have on the screen (20x30)
+# and shown 1:1, so every pixel of the frame lies on a screen pixel and the
+# frame is exactly the same on the four sides (a scaled knob gave 1 px on one
+# side and 2 px on the other):
+#   selected  yellow 2 px, black 1 px, light bevel (top, left) 2 px, purple fill
+#   static    black 3 px, light bevel (top, left) 2 px, grey fill
 # The colours and the texture are the ones of the button sprites: the fill is a
 # piece of the middle of the button (without its bevel), repeated if needed.
+KNOB_W, KNOB_H = 20, 30
+KNOB_SELECTED_AT, KNOB_STATIC_AT = (40, 92), (64, 92)
+
+
 def make_knob(sheet, button_xy, selected, dst):
     bx, by = button_xy
     px = sheet.load()
-    W, H = 16, 24
-    knob = Image.new("RGBA", (18, 26), (0, 0, 0, 0))
+    knob = Image.new("RGBA", (KNOB_W, KNOB_H), (0, 0, 0, 0))
     kp = knob.load()
     if selected:
-        ring = [(253, 253, 152, 255), (0, 0, 0, 255)]
+        ring = [(253, 253, 152, 255), (253, 253, 152, 255), (0, 0, 0, 255)]
         light = (164, 164, 233, 255)
     else:
-        ring = [(0, 0, 0, 255), (0, 0, 0, 255)]
+        ring = [(0, 0, 0, 255)] * 3
         light = (147, 147, 147, 255)
-    ins = len(ring)                       # the frame: 2 px on every side
+    ins = len(ring)                       # the frame: 3 px on every side
+    bevel = 2                             # the light bevel, top and left
     tex_x0, tex_y0, tex_w, tex_h = bx + 80, by + 7, 12, 12   # inside the button
-    for y in range(H):
-        for x in range(W):
-            d = min(x, y, W - 1 - x, H - 1 - y)          # the distance from the edge
+    for y in range(KNOB_H):
+        for x in range(KNOB_W):
+            d = min(x, y, KNOB_W - 1 - x, KNOB_H - 1 - y)    # the distance from the edge
             if d < ins:
                 c = ring[d]
-            elif x == ins or y == ins:
+            elif x < ins + bevel or y < ins + bevel:
                 c = light
             else:
                 c = px[tex_x0 + (x - ins) % tex_w, tex_y0 + (y - ins) % tex_h]
             kp[x, y] = c
-    sheet.paste(Image.new("RGBA", (18, 26), (0, 0, 0, 0)), dst)
+    sheet.paste(Image.new("RGBA", (KNOB_W, KNOB_H), (0, 0, 0, 0)), dst)
     sheet.paste(knob, dst)
 
 
-make_knob(sheet, (0, 0), True, (262, 26))
-make_knob(sheet, (184, 1), False, (280, 26))
+# the old cells of the knobs are not used any more
+sheet.paste(Image.new("RGBA", (18, 26), (0, 0, 0, 0)), (262, 26))
+sheet.paste(Image.new("RGBA", (18, 26), (0, 0, 0, 0)), (280, 26))
+make_knob(sheet, (0, 0), True, KNOB_SELECTED_AT)
+make_knob(sheet, (184, 1), False, KNOB_STATIC_AT)
 
 # Fully transparent pixels all get one colour, so they take one palette entry.
 px = sheet.load()
