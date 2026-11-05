@@ -42,7 +42,7 @@ MODELS = {
         "lines": [
             [(79, 33), (82, 30), (85, 30)],           # R (the top of the slider: open, the
                                                       # shoulders stand over the face buttons)
-            [(71, 51), (85, 51)],                     # the face buttons
+            [(71, 49), (85, 49)],                     # the face buttons
             [(50, 58), (59, 67), (80, 67)],           # Start (the lower bar)
             [(43, 54), (42, 55), (42, 67)],           # Select (the upper bar)
         ],
