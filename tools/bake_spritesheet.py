@@ -124,11 +124,12 @@ for i, src in enumerate((20, 40, 0, 60)):
 
 # The knobs of the sliders: 16x24 pixels in the 18x26 cell (the slider
 # background is 24 rows high in its 26-row cell, so the cell has transparent
-# edges at the right and the bottom), with the frame of the old knobs and the
-# colours and the texture of the button sprites:
-#   selected  yellow 1 px, black 1 px, light bevel, purple fill, dark bevel
-#   static    black 2 px, light bevel, grey fill, dark bevel
-# The fill is a piece of the middle of the button itself.
+# edges at the right and the bottom). The frame is the one of the old knobs, the
+# same on all four sides, and the light bevel is only at the top and the left:
+#   selected  yellow 1 px, black 1 px, light bevel, purple fill
+#   static    black 2 px, light bevel, grey fill
+# The colours and the texture are the ones of the button sprites: the fill is a
+# piece of the middle of the button (without its bevel), repeated if needed.
 def make_knob(sheet, button_xy, selected, dst):
     bx, by = button_xy
     px = sheet.load()
@@ -137,13 +138,12 @@ def make_knob(sheet, button_xy, selected, dst):
     kp = knob.load()
     if selected:
         ring = [(253, 253, 152, 255), (0, 0, 0, 255)]
-        light, dark = (164, 164, 233, 255), (92, 92, 186, 255)
+        light = (164, 164, 233, 255)
     else:
         ring = [(0, 0, 0, 255), (0, 0, 0, 255)]
-        light, dark = (147, 147, 147, 255), (91, 91, 91, 255)
-    ins = len(ring)                       # the frame: 2 px
-    # the middle of the button gives the fill (its texture)
-    tex_x, tex_y = bx + 80, by + 3
+        light = (147, 147, 147, 255)
+    ins = len(ring)                       # the frame: 2 px on every side
+    tex_x0, tex_y0, tex_w, tex_h = bx + 80, by + 7, 12, 12   # inside the button
     for y in range(H):
         for x in range(W):
             d = min(x, y, W - 1 - x, H - 1 - y)          # the distance from the edge
@@ -151,10 +151,8 @@ def make_knob(sheet, button_xy, selected, dst):
                 c = ring[d]
             elif x == ins or y == ins:
                 c = light
-            elif x == W - 1 - ins or y == H - 1 - ins:
-                c = dark
             else:
-                c = px[tex_x + x - ins - 1, tex_y + y - ins - 1]
+                c = px[tex_x0 + (x - ins) % tex_w, tex_y0 + (y - ins) % tex_h]
             kp[x, y] = c
     sheet.paste(Image.new("RGBA", (18, 26), (0, 0, 0, 0)), dst)
     sheet.paste(knob, dst)
