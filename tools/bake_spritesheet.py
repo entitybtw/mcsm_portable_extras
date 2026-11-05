@@ -122,26 +122,46 @@ for i, src in enumerate((20, 40, 0, 60)):
     icon = sheet.crop((src, 26, src + 20, 46)).resize((14, 14), Image.BOX)
     sheet.paste(icon, (144 + 16 * i, 56))
 
-# The knobs of the sliders (18x26, selected at 262,26 and static at 280,26) are
-# made of the button sprites: the 4 px caps (border, bevel) and 10 px of the
-# middle (the texture) of the selected button (0,0) and of the static one
-# (184,1), both 184x25; the middle row is repeated to make 26 rows.
-def knob(src, dst):
-    btn = sheet.crop((src[0], src[1], src[0] + 184, src[1] + 25))
-    tmp = Image.new("RGBA", (18, 25), (0, 0, 0, 0))
-    tmp.paste(btn.crop((0, 0, 4, 25)), (0, 0))
-    tmp.paste(btn.crop((87, 0, 97, 25)), (4, 0))
-    tmp.paste(btn.crop((180, 0, 184, 25)), (14, 0))
-    k = Image.new("RGBA", (18, 26), (0, 0, 0, 0))
-    k.paste(tmp.crop((0, 0, 18, 12)), (0, 0))
-    k.paste(tmp.crop((0, 12, 18, 13)), (0, 12))
-    k.paste(tmp.crop((0, 12, 18, 25)), (0, 13))
+# The knobs of the sliders: 16x24 pixels in the 18x26 cell (the slider
+# background is 24 rows high in its 26-row cell, so the cell has transparent
+# edges at the right and the bottom), with the frame of the old knobs and the
+# colours and the texture of the button sprites:
+#   selected  yellow 1 px, black 1 px, light bevel, purple fill, dark bevel
+#   static    black 2 px, light bevel, grey fill, dark bevel
+# The fill is a piece of the middle of the button itself.
+def make_knob(sheet, button_xy, selected, dst):
+    bx, by = button_xy
+    px = sheet.load()
+    W, H = 16, 24
+    knob = Image.new("RGBA", (18, 26), (0, 0, 0, 0))
+    kp = knob.load()
+    if selected:
+        ring = [(253, 253, 152, 255), (0, 0, 0, 255)]
+        light, dark = (164, 164, 233, 255), (92, 92, 186, 255)
+    else:
+        ring = [(0, 0, 0, 255), (0, 0, 0, 255)]
+        light, dark = (147, 147, 147, 255), (91, 91, 91, 255)
+    ins = len(ring)                       # the frame: 2 px
+    # the middle of the button gives the fill (its texture)
+    tex_x, tex_y = bx + 80, by + 3
+    for y in range(H):
+        for x in range(W):
+            d = min(x, y, W - 1 - x, H - 1 - y)          # the distance from the edge
+            if d < ins:
+                c = ring[d]
+            elif x == ins or y == ins:
+                c = light
+            elif x == W - 1 - ins or y == H - 1 - ins:
+                c = dark
+            else:
+                c = px[tex_x + x - ins - 1, tex_y + y - ins - 1]
+            kp[x, y] = c
     sheet.paste(Image.new("RGBA", (18, 26), (0, 0, 0, 0)), dst)
-    sheet.paste(k, dst)
+    sheet.paste(knob, dst)
 
 
-knob((0, 0), (262, 26))
-knob((184, 1), (280, 26))
+make_knob(sheet, (0, 0), True, (262, 26))
+make_knob(sheet, (184, 1), False, (280, 26))
 
 # Fully transparent pixels all get one colour, so they take one palette entry.
 px = sheet.load()
