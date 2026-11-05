@@ -40,8 +40,9 @@ MODELS = {
     "go": {
         "size": (86, 68),
         "lines": [
-            [(73, 4), (85, 4)],                       # R
-            [(71, 46), (79, 38), (85, 38)],           # the face buttons
+            [(79, 33), (82, 30), (85, 30)],           # R (the top of the slider: open, the
+                                                      # shoulders stand over the face buttons)
+            [(71, 51), (85, 51)],                     # the face buttons
             [(50, 58), (59, 67), (80, 67)],           # Start (the lower bar)
             [(43, 54), (42, 55), (42, 67)],           # Select (the upper bar)
         ],
