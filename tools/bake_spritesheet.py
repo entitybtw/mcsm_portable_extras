@@ -122,6 +122,27 @@ for i, src in enumerate((20, 40, 0, 60)):
     icon = sheet.crop((src, 26, src + 20, 46)).resize((14, 14), Image.BOX)
     sheet.paste(icon, (144 + 16 * i, 56))
 
+# The knobs of the sliders (18x26, selected at 262,26 and static at 280,26) are
+# made of the button sprites: the 4 px caps (border, bevel) and 10 px of the
+# middle (the texture) of the selected button (0,0) and of the static one
+# (184,1), both 184x25; the middle row is repeated to make 26 rows.
+def knob(src, dst):
+    btn = sheet.crop((src[0], src[1], src[0] + 184, src[1] + 25))
+    tmp = Image.new("RGBA", (18, 25), (0, 0, 0, 0))
+    tmp.paste(btn.crop((0, 0, 4, 25)), (0, 0))
+    tmp.paste(btn.crop((87, 0, 97, 25)), (4, 0))
+    tmp.paste(btn.crop((180, 0, 184, 25)), (14, 0))
+    k = Image.new("RGBA", (18, 26), (0, 0, 0, 0))
+    k.paste(tmp.crop((0, 0, 18, 12)), (0, 0))
+    k.paste(tmp.crop((0, 12, 18, 13)), (0, 12))
+    k.paste(tmp.crop((0, 12, 18, 25)), (0, 13))
+    sheet.paste(Image.new("RGBA", (18, 26), (0, 0, 0, 0)), dst)
+    sheet.paste(k, dst)
+
+
+knob((0, 0), (262, 26))
+knob((184, 1), (280, 26))
+
 # Fully transparent pixels all get one colour, so they take one palette entry.
 px = sheet.load()
 for yy in range(sheet.height):
